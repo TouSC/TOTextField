@@ -10,12 +10,6 @@
 #import <objc/runtime.h>
 @class TOTextField;
 
-typedef enum {
-    SCTextFieldClear,
-    SCTextFieldPass,
-    SCTextFieldFail
-}SCTextFieldStatus;
-
 @protocol TOTextFieldDelegate <NSObject>
 @optional
 - (void)textFieldDidChange:(TOTextField*)textField;

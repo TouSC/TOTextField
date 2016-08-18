@@ -12,6 +12,7 @@
 {
     NSString *preText;
     NSString *text;
+    CGFloat off_y;
 }
 
 - (id)init;
@@ -58,10 +59,6 @@ static const char scrollViewKey = '\02';
 }
 
 static const char isContentChanged = '\03';
-- (void)setScrollView:(UIScrollView *)scrollView;
-{
-    _scrollView = scrollView;
-}
 
 void touchBegan(id self,IMP _cmd,NSSet *touches,UIEvent *event)
 {
@@ -121,15 +118,13 @@ void touchBegan(id self,IMP _cmd,NSSet *touches,UIEvent *event)
     CGRect rect = [[(UIViewController*)_myDelegate view] convertRect:self.frame fromView:self.superview];
     CGRect inrect = [_scrollView convertRect:self.frame fromView:self.superview];
     CGFloat bottom = rect.origin.y+rect.size.height;
-    CGFloat top = [UIScreen mainScreen].bounds.size.height-320;
+    CGFloat top = [UIScreen mainScreen].bounds.size.height-290;
     
     if (_scrollView)
     {
         BOOL isChanged = [objc_getAssociatedObject(_scrollView, &isContentChanged) boolValue];
         if (!isChanged)
         {
-            CGFloat contentHeight = [objc_getAssociatedObject(_myDelegate, &contentHeightKey) floatValue];
-            _scrollView.contentSize = CGSizeMake(_scrollView.contentSize.width, contentHeight+250);
             objc_setAssociatedObject(_scrollView, &isContentChanged, @(YES), OBJC_ASSOCIATION_RETAIN);
         }
         if (bottom<top)
@@ -137,7 +132,7 @@ void touchBegan(id self,IMP _cmd,NSSet *touches,UIEvent *event)
             return;
         }
         [UIView animateWithDuration:0.3 animations:^{
-            [_scrollView setContentOffset:CGPointMake(0, inrect.origin.y-20)];
+            [_scrollView setContentOffset:CGPointMake(0, 290-([UIScreen mainScreen].bounds.size.height-rect.origin.y-rect.size.height))];
         }];
     }
     else
@@ -164,14 +159,12 @@ void touchBegan(id self,IMP _cmd,NSSet *touches,UIEvent *event)
 void hideKeyboard(id self,IMP _cmd,NSNotification *notification)
 {
     UIScrollView *scrollView = objc_getAssociatedObject(self, &scrollViewKey);
-    CGFloat contentHeight = [objc_getAssociatedObject(self, &contentHeightKey) floatValue];
     if (scrollView)
     {
-        scrollView.contentSize = CGSizeMake(scrollView.contentSize.width, contentHeight);
         objc_setAssociatedObject(scrollView, &isContentChanged, @(NO), OBJC_ASSOCIATION_RETAIN);
-        if (scrollView.contentOffset.y>(scrollView.contentSize.height-scrollView.frame.size.height))
+        if (scrollView.contentOffset.y>0)
         {
-            [scrollView setContentOffset:CGPointMake(0, scrollView.contentSize.height-scrollView.frame.size.height) animated:YES];
+            [scrollView setContentOffset:CGPointMake(0, 0) animated:YES];
         }
     }
     else
